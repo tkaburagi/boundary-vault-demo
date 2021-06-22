@@ -23,3 +23,6 @@ run --rm -d \
     -e POSTGRES_HOST_AUTH_METHOD=trust \
     postgres:12-alpine
 ```
+
+## Vault
+Waiting for integration :)
