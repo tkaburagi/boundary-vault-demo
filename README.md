@@ -1,5 +1,10 @@
 # boundary-psql-ssh-demo
 
+TODO
+* terraforming
+* RDP
+* SSH Vault Integration
+
 ## terraform
 ```
 terraform apply
