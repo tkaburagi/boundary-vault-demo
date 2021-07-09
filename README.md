@@ -4,6 +4,7 @@ TODO
 * terraforming
 * RDP
 * SSH Vault Integration
+* Boundary Exec
 
 ## terraform
 ```
