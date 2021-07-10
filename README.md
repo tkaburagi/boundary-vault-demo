@@ -31,8 +31,14 @@ $ psql -d postgres -h 127.0.0.1 -p 5432 -U postgres
 # create role vault with superuser login createrole password 'vault-password';
 ```
 
-## Vault
+## Vault Setup
+
+### PSQL Secret Engine
+```shell script
+vault secrets enable database
 ```
+
+```shell script
 vault write database/config/postgres \
       plugin_name=postgresql-database-plugin \
       connection_url="postgresql://{{username}}:{{password}}@localhost:5432/postgres?sslmode=disable" \
@@ -57,22 +63,25 @@ vault read database/creds/dba
 psql -d postgres -h 127.0.0.1 -p 5432 -U v-root-dba-yiY3EJlpngXg0wYvRN7p-1625629960
 ```
 
-## Boundary & Vault Setting
+### SSH Secret Engine
+
+
+### Prepare for boundary Integrations
 ```shell script
 vault policy write psql-dba dba-policy.hcl
 vault policy write boundary-controller boundary-controller-policy.hcl
 ```
 
-```
+```shell script
 vault token create \
   -no-default-policy=true \
   -policy="boundary-controller" \
   -policy="psql-dba" \
   -orphan=true \
-  -period=20m \
   -renewable=true
 ```
 
+## (Example)Boundary Credentials Store Manual Setup
 
 ```shell script
 boundary authenticate password \
@@ -109,6 +118,8 @@ Credential Store information:
     Address:           http://127.0.0.1:8200
     Token HMAC:        46GzT0vKXZwJ37ARowCa-_Xgj9lB_s5J8qyNBqaQdQI
 ```
+
+### PSQL
 
 ```shell script
 boundary credential-libraries create vault \
@@ -199,3 +210,6 @@ boundary targets authorize-session -id ttcp_df0SBRpSzE -format json | jq .
 ```shell script
 boundary connect postgres -target-id ttcp_df0SBRpSzE -dbname postgres
 ```
+
+
+### SSH
