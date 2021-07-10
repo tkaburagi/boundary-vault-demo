@@ -1,5 +1,11 @@
 # boundary-psql-ssh-demo
 
+TODO
+* terraforming
+* RDP
+* SSH Vault Integration
+* Boundary Exec
+
 ## terraform
 ```
 terraform apply
@@ -210,6 +216,9 @@ boundary targets authorize-session -id ttcp_df0SBRpSzE -format json | jq .
 ```shell script
 boundary connect postgres -target-id ttcp_df0SBRpSzE -dbname postgres
 ```
+<<<<<<< HEAD
 
 
 ### SSH
+=======
+>>>>>>> 7dccf327087ccae49826ea34614b7184f4257038
