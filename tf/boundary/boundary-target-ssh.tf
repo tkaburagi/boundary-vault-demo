@@ -1,39 +1,14 @@
-resource "boundary_scope" "global" {
-  global_scope = true
-  scope_id     = "global"
-}
-
-resource "boundary_scope" "org" {
-  name                     = "tkaburagi"
-  scope_id                 = boundary_scope.global.id
-  auto_create_admin_role   = true
-  auto_create_default_role = true
-}
-
-resource "boundary_scope" "project" {
-  name                   = "Demo Project"
-  description            = "My first scope!"
-  scope_id               = boundary_scope.org.id
-  auto_create_admin_role = true
-}
-
-resource "boundary_host_catalog" "my-host-catalog" {
-  name     = "My Host Catalog"
-  type     = "static"
-  scope_id = boundary_scope.project.id
-}
-
 resource "boundary_host" "aws-demo" {
   name            = "aws-demo"
   type            = "static"
-  address         = "13.231.69.129"
+  address         = "35.74.166.40"
   host_catalog_id = boundary_host_catalog.my-host-catalog.id
 }
 
 resource "boundary_host" "gcp-demo" {
   name            = "gcp-demo"
   type            = "static"
-  address         = "35.200.15.197"
+  address         = "34.84.245.180"
   host_catalog_id = boundary_host_catalog.my-host-catalog.id
 }
 

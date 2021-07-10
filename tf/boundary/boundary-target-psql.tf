@@ -22,4 +22,7 @@ resource "boundary_target" "qsql-target" {
   host_set_ids = [
     boundary_host_set.local.id
   ]
+  application_credential_library_ids = [
+    boundary_credential_library_vault.psql_dba.id
+  ]
 }
