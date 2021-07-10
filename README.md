@@ -1,17 +1,20 @@
 # boundary-psql-ssh-demo
 
+![](img/img.png)
+
 TODO
-* terraforming
 * RDP
 * SSH Vault Integration
 * Boundary Exec
+* MySQL Static Secret Engine
+* More ACLs
 
-## terraform
+## 1. terraform
 ```
 terraform apply
 ```
 
-## boundary
+## 2. boundary
 ```
 boundary dev
 ```
@@ -21,7 +24,7 @@ cd boundary
 terraform apply
 ```
 
-## Postgres
+## 3. Postgres
 ```
 docker run --rm -d \
     -e POSTGRES_PASSWORD=secret \
@@ -37,9 +40,9 @@ $ psql -d postgres -h 127.0.0.1 -p 5432 -U postgres
 # create role vault with superuser login createrole password 'vault-password';
 ```
 
-## Vault Setup
+## 4. Vault Setup
 
-### PSQL Secret Engine
+### 4-1. PSQL Secret Engine
 ```shell script
 vault secrets enable database
 ```
@@ -69,10 +72,12 @@ vault read database/creds/dba
 psql -d postgres -h 127.0.0.1 -p 5432 -U v-root-dba-yiY3EJlpngXg0wYvRN7p-1625629960
 ```
 
-### SSH Secret Engine
+### 4-2. SSH Secret Engine
+```shell script
+vault secrets enable ssh
+```
 
-
-### Prepare for boundary Integrations
+### 4-3. Prepare for boundary Integration
 ```shell script
 vault policy write psql-dba dba-policy.hcl
 vault policy write boundary-controller boundary-controller-policy.hcl
@@ -216,9 +221,5 @@ boundary targets authorize-session -id ttcp_df0SBRpSzE -format json | jq .
 ```shell script
 boundary connect postgres -target-id ttcp_df0SBRpSzE -dbname postgres
 ```
-<<<<<<< HEAD
-
 
 ### SSH
-=======
->>>>>>> 7dccf327087ccae49826ea34614b7184f4257038
