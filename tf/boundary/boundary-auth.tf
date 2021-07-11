@@ -26,20 +26,6 @@ resource "boundary_user" "tkaburagi" {
   scope_id    = boundary_scope.org.id
 }
 
-resource "boundary_role" "psql-admin" {
-  name           = "PSQL Admin Role"
-  grant_scope_id = boundary_scope.project.id
-  grant_strings = [
-    "id=*;type=target;actions=*",
-    "id=${boundary_host_set.local.id};actions=*",
-    "id=${boundary_host.localhost.id};actions=*",
-    "id=${boundary_host_catalog.my-host-catalog.id};actions=*",
-    "id=*;type=session;actions=cancel:self,read"
-  ]
-  scope_id      = boundary_scope.org.id
-  principal_ids = [boundary_user.dbadmin.id]
-}
-
 resource "boundary_role" "server-admin" {
   name           = "Server Admin Role"
   grant_scope_id = boundary_scope.project.id
@@ -73,4 +59,18 @@ resource "boundary_user" "dbadmin" {
   description = "dbadmin's user resource"
   account_ids = [boundary_account.dbadmin.id]
   scope_id    = boundary_scope.org.id
+}
+
+resource "boundary_role" "psql-admin" {
+  name           = "PSQL Admin Role"
+  grant_scope_id = boundary_scope.project.id
+  grant_strings = [
+    "id=*;type=target;actions=*",
+    "id=${boundary_host_set.local.id};actions=*",
+    "id=${boundary_host.localhost.id};actions=*",
+    "id=${boundary_host_catalog.my-host-catalog.id};actions=*",
+    "id=*;type=session;actions=cancel:self,read"
+  ]
+  scope_id      = boundary_scope.org.id
+  principal_ids = [boundary_user.dbadmin.id]
 }
