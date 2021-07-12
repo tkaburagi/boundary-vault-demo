@@ -3,46 +3,108 @@
 ![](img/img.png)
 
 TODO
-* RDP
-* SSH Vault Integration
-* Boundary Exec
-* MySQL Static Secret Engine
+* rdp
+* kube
 * More ACLs
 
-## 1. terraform
+```shell script
+git clone thisrepo
+cd thisrepo
 ```
+
+## Pre-requisite
+1. Setup Azure OIDC. Retrieve and set as `TF_VAR`.
+* issuer
+* client_id
+* client secret
+* subject
+
+```shell script
+export TF_VAR_issuer=
+export TF_VAR_client_id=
+export TF_VAR_client_secret=
+export TF_VAR_subject=
+```
+
+**For quick start, remove OIDC related settings**
+Commenting out the code in `tf/baundary/boundary-auth.tf` from the line of `//oidc` to `//passsword` and set the dummy values.
+
+```shell script
+export TF_VAR_issuer=https://dummy
+export TF_VAR_client_id=dummy
+export TF_VAR_client_secret=dummy
+export TF_VAR_subject=dummy
+```
+
+## 0. CA Public Key for GCP VM 
+```shell script
+vault secrets enable ssh
+vault write ssh/config/ca generate_signing_key=true
+vault write ssh/roles/ubuntu -<<"EOH"
+{
+  "allow_user_certificates": true,
+  "allowed_users": "ubuntu",
+  "default_extensions": [
+    {
+      "permit-pty": ""
+    }
+  ],
+  "key_type": "ca",
+  "default_user": "ubuntu",
+  "ttl": "60m0s"
+}
+EOH
+curl -o trusted-user-ca-keys.pem http://127.0.0.1:8200/v1/ssh/public_key
+```
+
+
+## 1. Infra
+```shell script
+cd tf/infra
 terraform apply
 ```
 
-## 2. boundary
-```
-boundary dev
-```
-
-```
-cd boundary
-terraform apply
-```
-
-## 3. Postgres
-```
+## 2. Postgres & MySQL
+```shell script
 docker run --rm -d \
     -e POSTGRES_PASSWORD=secret \
     -e POSTGRES_DB="boundarydemo" \
     --name  boundarydemo\
     -p 5432:5432 \
-    -v postgres-tmp:/var/lib/postgresql/data-for-boundary-demo \
+    -v postgres-tmp:/Users/Shared/data-for-boundary-demo \
     postgres:12-alpine
 ```
 
-```
-$ psql -d postgres -h 127.0.0.1 -p 5432 -U postgres
+```shell script
+psql -d postgres -h 127.0.0.1 -p 5432 -U postgres
 # create role vault with superuser login createrole password 'vault-password';
 ```
 
-## 4. Vault Setup
+```shell script
+docker run --rm -d \
+  --name mysql \
+  -e MYSQL_ROOT_PASSWORD=rooooot \
+  -p 3306:3306 \
+  mysql:latest
 
-### 4-1. PSQL Secret Engine
+mysql -uroot -p -h 127.0.0.1
+> CREATE USER 'boundarydemo-mysql' IDENTIFIED BY 'password';
+```
+
+## 3. Vault Setup
+
+### 3-1. KV Secret Engine
+```shell script
+vault secrets enable -path=boundary kv
+vault kv put boundary/mysql-user username=boundarydemo-mysql password=password
+```
+
+#### Test
+```shell script
+vault kv get boundary/mysql-user
+```
+
+### 3-2. PSQL Secret Engine
 ```shell script
 vault secrets enable database
 ```
@@ -68,18 +130,36 @@ vault write database/roles/dba \
 vault read database/creds/dba
 ```
 
+#### Test
+
 ```shell script
 psql -d postgres -h 127.0.0.1 -p 5432 -U v-root-dba-yiY3EJlpngXg0wYvRN7p-1625629960
 ```
 
-### 4-2. SSH Secret Engine
+### 3-3. SSH Secret Engine
 ```shell script
-vault secrets enable ssh
+cd rootofthisrepo
+ssh-keygen -t rsa -f boundarydemo
+vault write -field=signed_key ssh/sign/ubuntu \
+    public_key=@boundarydemo.pub > boundarydemo-signed-cert.pub
+ssh-keygen -Lf boundarydemo-signed-cert.pub
 ```
 
-### 4-3. Prepare for boundary Integration
+**Replace ``public_key`` in `tf` -> `boundary` -> `creds.tf` -> `boundary_credential_library_vault` -> `htt_request_body` -> `public_key` with `boundarydemo.pub`
+
+#### Test
+
+```shell script
+ssh -i boundarydemo-signed-cert.pub \
+  -i boundarydemo \
+  ubuntu@35.75.209.86 #GCP's IP
+```
+
+### 3-4. Prepare for Boundary Integration
 ```shell script
 vault policy write psql-dba dba-policy.hcl
+vault policy write ssh-ubuntu ssh-policy.hcl
+vault policy write kv-mysql kv-mysql.hcl
 vault policy write boundary-controller boundary-controller-policy.hcl
 ```
 
@@ -88,11 +168,108 @@ vault token create \
   -no-default-policy=true \
   -policy="boundary-controller" \
   -policy="psql-dba" \
+  -policy="ssh-ubuntu" \
+  -policy="kv-mysql" \
   -orphan=true \
-  -renewable=true
+  -renewable=true \
+  -period=765h
 ```
 
-## (Example)Boundary Credentials Store Manual Setup
+## 4. Boundary Setup
+```shell script
+boundary dev
+```
+
+**Replace variables.tf**
+
+```shell script
+cd tf/boundary
+terraform apply
+```
+
+## 5. Test Connections
+
+```shell script
+boundary authenticate password \
+  -auth-method-id=ampw_1234567890 \
+  -login-name=admin \
+  -password=password
+```
+
+### 5-1. PSQL by Vault Dynamic Secret
+
+```shell script
+boundary connect postgres -target-id ttcp_df0SBRpSzE -dbname postgres
+```
+
+### 5-2. SSH to GCP by Vault Dynamic Secret
+
+**SSH Helper is not supported yet. Secret should be injected manually.**
+
+```shell script
+boundary targets authorize-session -id ttcp_5tcclnDIWi
+```
+
+* **Copy `signed_key` and paste to `boundarydemo-signed-cert.pub`**
+* **Copy `authorization_token`** 
+
+```shell script
+boundary connect -authz-token=(authorization_token)
+
+ssh ubuntu@127.0.0.1 -p 55680 \
+  -i boundarydemo \
+  -i boundarydemo-signed-cert.pub
+```
+
+### 5-3. SSH to AWS by User's Secret
+```shell script
+boundary connect ssh -target-id ttcp_9s8h0NtEry -username=ubuntu
+# default password=happyhacking
+```
+
+### 5-4. MySQL by Vault Static Secret
+
+**Exec Helper is not supported yet. Secret should be injected manually.**
+
+```shell script
+boundary targets authorize-session -id ttcp_iJRMp3bYQc
+# Copy the password output
+# Copy `authorization_token` 
+boundary connect -authz-token=(authorization_token)
+mysql -uboundarydemo-mysql -p -P 55680 --protocol=tcp
+```
+
+## (Additional) Trying PSQL Helper with KV Secret Engine
+```shell script
+vault kv put boundary/mysql-user username=postgres password=secret
+```
+
+Change `psql-target` in `boundary-target-psql.tf` to
+
+```
+resource "boundary_target" "psql-target" {
+  name         = "PSQL Target"
+  type         = "tcp"
+  default_port = "5432"
+  scope_id     = boundary_scope.project.id
+  host_set_ids = [
+    boundary_host_set.local.id
+  ]
+  application_credential_library_ids = [
+    boundary_credential_library_vault.kv_mysql.id
+  ]
+}
+```
+
+```shell script
+terraform apply
+boundary connect postgres -target-id ttcp_CSIYmhPn4s -dbname postgres
+```
+
+This means PSQL helper is able to get secrets from Vault KV and inject them automatically. 
+
+
+## (Example) Boundary Credentials Store Manual Setup without Terraform
 
 ```shell script
 boundary authenticate password \
@@ -129,8 +306,6 @@ Credential Store information:
     Address:           http://127.0.0.1:8200
     Token HMAC:        46GzT0vKXZwJ37ARowCa-_Xgj9lB_s5J8qyNBqaQdQI
 ```
-
-### PSQL
 
 ```shell script
 boundary credential-libraries create vault \
@@ -213,13 +388,3 @@ Target information:
   Attributes:
     Default Port:             5432
 ```
-
-```shell script
-boundary targets authorize-session -id ttcp_df0SBRpSzE -format json | jq .
-```
-
-```shell script
-boundary connect postgres -target-id ttcp_df0SBRpSzE -dbname postgres
-```
-
-### SSH
