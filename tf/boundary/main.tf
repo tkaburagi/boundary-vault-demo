@@ -1,3 +1,12 @@
+terraform {
+  required_providers {
+    boundary = {
+      source = "hashicorp/boundary"
+      version = "1.0.3"
+    }
+  }
+}
+
 provider "boundary" {
   addr                            = "http://127.0.0.1:9200"
   auth_method_id                  = "ampw_1234567890"
@@ -11,7 +20,7 @@ resource "boundary_scope" "global" {
 }
 
 resource "boundary_scope" "org" {
-  name                     = "tkaburagi"
+  name                     = var.org
   scope_id                 = boundary_scope.global.id
   auto_create_admin_role   = true
   auto_create_default_role = true

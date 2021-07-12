@@ -14,7 +14,7 @@ resource "boundary_host_set" "local" {
   ]
 }
 
-resource "boundary_target" "qsql-target" {
+resource "boundary_target" "psql-target" {
   name         = "PSQL Target"
   type         = "tcp"
   default_port = "5432"

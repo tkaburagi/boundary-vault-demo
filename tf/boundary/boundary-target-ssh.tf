@@ -1,14 +1,14 @@
 resource "boundary_host" "aws-demo" {
   name            = "aws-demo"
   type            = "static"
-  address         = "35.74.166.40"
+  address         = var.aws_host
   host_catalog_id = boundary_host_catalog.my-host-catalog.id
 }
 
 resource "boundary_host" "gcp-demo" {
   name            = "gcp-demo"
   type            = "static"
-  address         = "34.84.245.180"
+  address         = var.gcp_host
   host_catalog_id = boundary_host_catalog.my-host-catalog.id
 }
 
@@ -30,14 +30,29 @@ resource "boundary_host_set" "gcp" {
   ]
 }
 
-resource "boundary_target" "ssh-target" {
-  name         = "SSH Target"
+resource "boundary_target" "ssh-aws-target" {
+  name         = "SSH AWS Target"
+  type         = "tcp"
+  default_port = "22"
+  scope_id     = boundary_scope.project.id
+  host_set_ids = [
+    boundary_host_set.aws.id
+  ]
+  application_credential_library_ids = [
+    //todo
+    boundary_credential_library_vault.kv_mysql.id
+  ]
+}
+
+resource "boundary_target" "ssh-gcp-target" {
+  name         = "SSH GCP Target"
   type         = "tcp"
   default_port = "22"
   scope_id     = boundary_scope.project.id
   host_set_ids = [
     boundary_host_set.gcp.id,
-    boundary_host_set.aws.id
+  ]
+  application_credential_library_ids = [
+    boundary_credential_library_vault.ssh_ubuntu.id
   ]
 }
-
