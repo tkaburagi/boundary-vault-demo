@@ -13,10 +13,6 @@ variable "image" {
   default = "ubuntu-1804-bionic-v20201014"
 }
 
-variable "ubuntu_password" {
-  default = "399ed64f98b286f8"
-}
-
 // aws
 variable "ami" {
   default = "ami-02b658ac34935766f"
@@ -27,4 +23,9 @@ variable "aws_region" {
 
 variable "aws_machine_type" {
   default = "t2.micro"
+}
+
+
+variable "ubuntu_password" {
+  default = "happyhacking"
 }

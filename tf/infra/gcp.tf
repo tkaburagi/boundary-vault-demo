@@ -19,9 +19,9 @@ resource "google_compute_instance" "boundary-demo-gcp" {
 }
 
 data "template_file" "init_gcp" {
-  template = file("setup.sh")
+  template = file("setup-gcp.sh")
   vars = {
-    ubuntu_password = var.ubuntu_password
+    ca_key = file("../../trusted-user-ca-keys.pem")
   }
 }
 
