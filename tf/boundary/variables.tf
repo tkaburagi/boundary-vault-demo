@@ -29,3 +29,6 @@ variable "aws_host" {
 variable "gcp_host" {
   default = "34.146.166.173"
 }
+variable "rdp_host" {
+  default = "40.117.185.50"
+}
