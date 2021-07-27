@@ -3,7 +3,6 @@
 ![](img/img.png)
 
 TODO
-* rdp
 * kube
 * More ACLs
 
@@ -18,6 +17,11 @@ cd thisrepo
 * client_id
 * client secret
 * subject
+
+2. Setup Azure Virtual Desktop
+* AVD cannot be fully terraformed. Please follow [this instruction](https://docs.microsoft.com/en-us/azure/virtual-desktop/getting-started-feature).
+    * Create a workspace and a VM.
+    * Associate public IP for the VM.
 
 ```shell script
 export TF_VAR_issuer=
@@ -97,11 +101,13 @@ mysql -uroot -p -h 127.0.0.1
 ```shell script
 vault secrets enable -path=boundary kv
 vault kv put boundary/mysql-user username=boundarydemo-mysql password=password
+vault kv put boundary/rdp-user username=(RDP USERNAME) password=(RDP PASSWORD)
 ```
 
 #### Test
 ```shell script
 vault kv get boundary/mysql-user
+vault kv get boundary/rdp-user
 ```
 
 ### 3-2. PSQL Secret Engine
@@ -160,6 +166,7 @@ ssh -i boundarydemo-signed-cert.pub \
 vault policy write psql-dba dba-policy.hcl
 vault policy write ssh-ubuntu ssh-policy.hcl
 vault policy write kv-mysql kv-mysql.hcl
+vault policy write kv-rdp kv-rdp.hcl
 vault policy write boundary-controller boundary-controller-policy.hcl
 ```
 
@@ -170,6 +177,7 @@ vault token create \
   -policy="psql-dba" \
   -policy="ssh-ubuntu" \
   -policy="kv-mysql" \
+  -policy="kv-rdp" \
   -orphan=true \
   -renewable=true \
   -period=765h
@@ -237,6 +245,14 @@ boundary targets authorize-session -id ttcp_iJRMp3bYQc
 # Copy `authorization_token` 
 boundary connect -authz-token=(authorization_token)
 mysql -uboundarydemo-mysql -p -P 55680 --protocol=tcp
+```
+
+### 5-5. RDP by Vault Static Secret
+
+**RDP Helper is not supported yet. Secret should be injected manually.**
+
+```shell script
+boundary connect rdp -target-id ttcp_DqXzkcPfqN
 ```
 
 ## (Additional) Trying PSQL Helper with KV Secret Engine

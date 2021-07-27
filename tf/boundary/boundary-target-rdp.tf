@@ -22,4 +22,7 @@ resource "boundary_target" "rdp-target" {
   host_set_ids = [
     boundary_host_set.rdp.id
   ]
+  application_credential_library_ids = [
+    boundary_credential_library_vault.kv_rdp.id
+  ]
 }

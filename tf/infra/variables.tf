@@ -25,7 +25,20 @@ variable "aws_machine_type" {
   default = "t2.micro"
 }
 
-
 variable "ubuntu_password" {
   default = "happyhacking"
+}
+
+// RDP Azure
+
+variable "location" {
+  default = "East US"
+}
+
+variable "admin_password" {
+  default = "Password1234"
+}
+
+variable "admin_user" {
+  default = "adminuser"
 }

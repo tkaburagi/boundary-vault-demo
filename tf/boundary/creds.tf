@@ -23,6 +23,14 @@ resource "boundary_credential_library_vault" "kv_mysql" {
   name                = "KV MySQL Library"
   description         = "KV MySQL"
   credential_store_id = boundary_credential_store_vault.vault.id
-  path                = var.vault_kv_path
+  path                = var.vault_kv_path_mysql
+  http_method         = "GET"
+}
+
+resource "boundary_credential_library_vault" "kv_rdp" {
+  name                = "KV RDP Library"
+  description         = "KV RDP"
+  credential_store_id = boundary_credential_store_vault.vault.id
+  path                = var.vault_kv_path_rdp
   http_method         = "GET"
 }

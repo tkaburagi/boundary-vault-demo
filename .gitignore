@@ -2,3 +2,6 @@
 .idea
 .terraform*
 terraform.tfstate*
+trusted-user-ca-keys.pem
+boundarydemo
+*.pub
