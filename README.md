@@ -163,11 +163,11 @@ ssh -i boundarydemo-signed-cert.pub \
 
 ### 3-4. Prepare for Boundary Integration
 ```shell script
-vault policy write psql-dba dba-policy.hcl
-vault policy write ssh-ubuntu ssh-policy.hcl
-vault policy write kv-mysql kv-mysql.hcl
-vault policy write kv-rdp kv-rdp.hcl
-vault policy write boundary-controller boundary-controller-policy.hcl
+vault policy write policies/psql-dba dba-policy.hcl
+vault policy write policies/ssh-ubuntu ssh-policy.hcl
+vault policy write policies/kv-mysql kv-mysql.hcl
+vault policy write policies/kv-rdp kv-rdp.hcl
+vault policy write policies/boundary-controller boundary-controller-policy.hcl
 ```
 
 ```shell script

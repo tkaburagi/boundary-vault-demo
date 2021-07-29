@@ -28,11 +28,11 @@ variable "vault_kv_path_rdp" {
   default = "boundary/rdp-user"
 }
 variable "aws_host" {
-  default = ""
+  default = "35.76.9.214"
 }
 variable "gcp_host" {
-  default = ""
+  default = "35.200.15.197"
 }
 variable "rdp_host" {
-  default = ""
+  default = "40.117.185.50"
 }
