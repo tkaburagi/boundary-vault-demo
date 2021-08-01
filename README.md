@@ -412,10 +412,3 @@ Target information:
   Attributes:
     Default Port:             5432
 ```
-
-
-kubectl get serviceaccount/get-pods-sa -o jsonpath='{.secrets[0].name}'
-kubectl get secret get-pods-sa-token-hhc9n -o jsonpath='{.data.token}'| base64 --decode
-kubectl config set-credentials get-pods-sa --token=${TOKEN}
-kubectl config set-context get-pods-context --cluster=gke_se-kabu_us-central1-c_lab-cluster --user get-pods-sa 
-kubectl config use-context get-pods-context
