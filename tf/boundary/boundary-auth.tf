@@ -30,11 +30,8 @@ resource "boundary_role" "server-admin" {
   name           = "Server Admin Role"
   grant_scope_id = boundary_scope.project.id
   grant_strings = [
-    "id=*;type=target;actions=*",
-    "id=${boundary_host_catalog.my-host-catalog.id};actions=*",
-    "id=*;type=host-set;actions=*",
-    "id=${boundary_host.aws-demo.id};actions=*",
-    "id=${boundary_host.gcp-demo.id};actions=*",
+    "id=${boundary_target.ssh-aws-target.id};actions=*",
+    "id=${boundary_target.ssh-gcp-target.id};actions=*",
     "id=*;type=session;actions=cancel:self,read"
   ]
   scope_id      = boundary_scope.org.id
@@ -65,10 +62,8 @@ resource "boundary_role" "psql-admin" {
   name           = "PSQL Admin Role"
   grant_scope_id = boundary_scope.project.id
   grant_strings = [
-    "id=*;type=target;actions=*",
-    "id=${boundary_host_set.local.id};actions=*",
-    "id=${boundary_host.localhost.id};actions=*",
-    "id=${boundary_host_catalog.my-host-catalog.id};actions=*",
+    "id=${boundary_target.psql-target.id};actions=*",
+    "id=${boundary_target.mysql-target.id};actions=*",
     "id=*;type=session;actions=cancel:self,read"
   ]
   scope_id      = boundary_scope.org.id
