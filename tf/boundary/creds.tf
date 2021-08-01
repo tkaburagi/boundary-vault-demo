@@ -14,7 +14,7 @@ resource "boundary_credential_library_vault" "ssh_ubuntu" {
   http_method         = "POST"
   http_request_body        = <<EOT
     {
-      "public_key": "ssh-rsa ...."
+      "public_key": "ssh-rsa ..."
     }
     EOT
 }

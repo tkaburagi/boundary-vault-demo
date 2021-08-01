@@ -36,6 +36,12 @@ export TF_VAR_client_secret=dummy
 export TF_VAR_subject=dummy
 ```
 
+3. Create GKE Cluster
+```shell script
+gcloud container clusters create lab-cluster --num-nodes=3 --zone asia-northeast1-a
+```
+
+
 ## 0. CA Public Key for GCP VM 
 ```shell script
 vault secrets enable ssh
@@ -249,6 +255,12 @@ mysql -uboundarydemo-mysql -p -P 55680 --protocol=tcp
 
 ```shell script
 boundary connect rdp -target-id ttcp_DqXzkcPfqN
+```
+
+### 5-6. kubectl by the User's credential
+
+```shell script
+boundary connect kube -target-id ttcp_DqXzkcPfqN -- get pods
 ```
 
 ## (Additional) Trying PSQL Helper with KV Secret Engine

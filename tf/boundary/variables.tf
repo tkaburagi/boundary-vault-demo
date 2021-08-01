@@ -28,11 +28,14 @@ variable "vault_kv_path_rdp" {
   default = "boundary/rdp-user"
 }
 variable "aws_host" {
-  default = "35.76.9.214"
+  default = ""
 }
 variable "gcp_host" {
-  default = "35.200.15.197"
+  default = ""
 }
 variable "rdp_host" {
-  default = "40.117.185.50"
+  default = ""
+}
+variable "gke_endpoint" {
+  default = ""
 }
