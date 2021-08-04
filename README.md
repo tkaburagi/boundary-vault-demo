@@ -36,12 +36,6 @@ export TF_VAR_client_secret=dummy
 export TF_VAR_subject=dummy
 ```
 
-3. Create GKE Cluster
-```shell script
-gcloud container clusters create lab-cluster --num-nodes=3 --zone asia-northeast1-a
-```
-
-
 ## 0. CA Public Key for GCP VM 
 ```shell script
 vault secrets enable ssh
