@@ -5,3 +5,7 @@ output "aws-ip" {
 output "gcp-ip" {
   value = google_compute_instance.boundary-demo-gcp.network_interface.0.access_config.0.nat_ip
 }
+
+output "gke-ip" {
+  value = google_container_cluster.primary.endpoint
+}
